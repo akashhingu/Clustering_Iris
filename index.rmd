@@ -1,0 +1,112 @@
+---
+title: "ISYE 6501 HWK 2"
+editor_options:
+  markdown:
+    wrap: 100
+output: html_document
+#date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+**Import Packages and IDE Prep**
+```{r}
+#rm(list = ls())
+set.seed(2)
+library(kernlab, plyr)
+library(kknn)
+library(tidyverse)
+library(stats)
+options(scipen=999)
+```
+
+**Read in Dataset(s)**
+```{r}
+data(iris)
+head(iris,10)
+```
+**Exploratory Data Analysis**
+```{r}
+#dimensions
+dim = dim(iris)
+dim
+
+#View unique values in response variable (species)
+unique_species = unique(iris['Species'])
+unique_species
+
+#summary stats on IRIS
+summary(iris)
+```
+
+**Visualize data**
+```{r}
+ggplot(data = iris, aes(Sepal.Length, Sepal.Width, color = Species)) + geom_point()
+ggplot(data = iris, aes(Petal.Length, Petal.Width, color = Species)) + geom_point()
+```
+
+
+**Scale IRIS dataset**
+```{r}
+##scale data
+iris_scaled = scale(iris[,1:4], center = TRUE, scale = TRUE)
+iris_scaled = as.data.frame(iris_scaled)
+iris_scaled['Species'] = iris[,5]
+head(iris_scaled,5)
+
+```
+**Visualize Scaled IRIS DS --Note there is clearer clustering with Petal Length & Petal Width**
+```{r}
+ggplot(data = iris_scaled, aes(Sepal.Length, Sepal.Width, color = Species)) +
+  geom_point()
+ggplot(data = iris_scaled, aes(Petal.Length, Petal.Width, color = Species)) +
+  geom_point()
+
+```
+
+**In order to find the optimal number of centers lets make an elbow diagram using All 4 predictors**
+```{r}
+#for loop to grab the total within sum of squares from each kmeans model with varying number of centers
+results_df_kmeans_elbow = data.frame(center = numeric(), totwithinss = numeric()) 
+for (center in seq(1,10)) {
+  kmeans = kmeans(iris_scaled[,1:4], centers = center, nstart = 10)
+  totwithinss = kmeans$tot.withinss
+  results_df_kmeans_elbow = rbind(results_df_kmeans_elbow, data.frame(center = center, totwithinss = totwithinss)) 
+}
+
+plot(x = results_df_kmeans_elbow$center, y = results_df_kmeans_elbow$totwithinss
+     ,type = 'b', xlab = 'Number of Clusters', ylab = 'Total_Within_Sum_Squares')
+
+```
+
+**Elbow Diagram using only Petal predictors based on earlier graphs where there is better clustering using only petal predictors**
+```{r}
+#for loop to grab the total within sum of squares from each kmeans model with varying number of centers
+results_df_kmeans_elbow_petals = data.frame(center = numeric(), totwithinss = numeric()) 
+for (center in seq(1,10)) {
+  kmeans = kmeans(iris_scaled[,3:4], centers = center, nstart = 10)
+  totwithinss = kmeans$tot.withinss
+  results_df_kmeans_elbow_petals = rbind(results_df_kmeans_elbow_petals, data.frame(center = center, totwithinss = totwithinss)) 
+}
+
+
+plot(x = results_df_kmeans_elbow_petals$center, y = results_df_kmeans_elbow_petals$totwithinss
+     ,type = 'b', xlab = 'Number of Clusters', ylab = 'Total_Within_Sum_Squares')
+```
+
+**3 clusters seems to be the most promising based on the elbow diagram on the Petal predictors (petal.length & petal.width)**
+
+
+**Lets view model for 3 clusters using only petal width and petal length as our predictors**
+```{r}
+kmeans_petalwl_3 = kmeans(iris[,3:4], centers = 3, nstart = 10)
+kmeans_petalwl_3
+```
+
+**Graphing predictions (k = 3, Petal.Length & Petal.Width)**
+```{r}
+ggplot(iris, aes(Petal.Length, Petal.Width, color = kmeans_petalwl_3$cluster)) + geom_point()
+```

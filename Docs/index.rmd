@@ -1,9 +1,9 @@
 ---
-title: "ISYE 6501 HWK 2"
+title: "Clustering Analysis on Iris"
 editor_options:
   markdown:
     wrap: 100
-output: html_document
+output: github_document
 #date: "`r Sys.Date()`"
 ---
 

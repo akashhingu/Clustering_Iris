@@ -1,9 +1,9 @@
 ---
 title: "Clustering Analysis on Iris"
-editor_options:
-  markdown:
-    wrap: 100
-output: github_document
+#editor_options:
+ # markdown:
+  #  wrap: 100
+output: html_document
 #date: "`r Sys.Date()`"
 ---
 
